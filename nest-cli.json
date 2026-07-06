@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/realstate-api/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/realstate-api/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/realstate-api",
+  "projects": {
+    "realstate-api": {
+      "type": "application",
+      "root": "apps/realstate-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/realstate-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/realstate-api/tsconfig.app.json"
+      }
+    },
+    "realstate-batch": {
+      "type": "application",
+      "root": "apps/realstate-batch",
+      "entryFile": "main",
+      "sourceRoot": "apps/realstate-batch/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/realstate-batch/tsconfig.app.json"
+      }
+    }
+  }
+}
