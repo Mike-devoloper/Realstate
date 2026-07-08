@@ -1,14 +1,10 @@
 export enum Message {
-    SOMETHING_WENT_WRONG = 'Something went wrong!',
-    NO_DATA_FOUND = 'No data found!',
+SOMETHING_WENT_WRONG = 'Something went wrong!',
+NO_DATA_FOUND = 'No data found!',
 CREATE_FAILED = 'Create failed!',
-
 UPDATE_FAILED = 'Update failed!',
-
 REMOVE_FAILED = 'Remove failed!',
-
 UPLOAD_FAILED = 'Upload failed!',
-
 BAD_REQUEST = 'Bad Request',
 NO_MEMBER_NICK = 'No member with that member nick!',
 BLOCKED_USER = 'You have been blocked!',
