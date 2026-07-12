@@ -12,18 +12,17 @@ export class MemberService {
 
     async signUp(input: MemberInput):Promise<Member> {
         //TO DO HASH PASSWORD
-        try {
+        try{
             const result = await this.memberSchema.create(input)
             //AUTH TOKEN 
             return result;
         } catch(err) {
-            console.log("Error in signUp service", err);
-            throw new BadRequestException(err)
+            console.log("error service signup", err.message);
+            throw new BadRequestException(Message.ALREADY_USED_MEMBER_NICK)
         }
     }
 
     async login(input: LoginInput):Promise<Member> {
-        try {
             const {memberNick, memberPassword} = input
             const response: Member = await this.memberSchema
             .findOne({memberNick: memberNick})
@@ -38,11 +37,7 @@ export class MemberService {
              const isMatch = memberPassword === response.memberPassword;
              if(!isMatch) throw new BadRequestException(Message.WRONG_PASSWORD)
             return response;
-            
-        } catch(err) {
-            console.log("Error in login service", err);
-            throw new BadRequestException(err)
-        }
+
     }
 
     async updateMember():Promise<string> {
