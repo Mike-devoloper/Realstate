@@ -13,11 +13,12 @@ export class MemberService {
     private authService: AuthService) {}
 
     async signUp(input: MemberInput):Promise<Member> {
-        //TO DO HASH PASSWORD
+        // HASH PASSWORD
         input.memberPassword = await this.authService.hashPassword(input.memberPassword);
         try{
             const result = await this.memberSchema.create(input)
             //AUTH TOKEN 
+            result.accessToken = await this.authService.createToken(result);
             return result;
         } catch(err) {
             console.log("error service signup", err.message);
@@ -26,7 +27,7 @@ export class MemberService {
     }
 
     async login(input: LoginInput):Promise<Member> {
-            const {memberNick, memberPassword} = input
+            const {memberNick, memberPassword} = input;
             const response: Member = await this.memberSchema
             .findOne({memberNick: memberNick})
             .select("+memberPassword")
@@ -39,6 +40,7 @@ export class MemberService {
              //Compare Hash Password
              const isMatch = await this.authService.comparePassword(memberPassword, response.memberPassword)
              if(!isMatch) throw new BadRequestException(Message.WRONG_PASSWORD)
+             response.accessToken = await this.authService.createToken(response)
             return response;
 
     }
