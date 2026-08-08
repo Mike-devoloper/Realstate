@@ -52,4 +52,13 @@ export class MemberService {
     async getMember():Promise<string> {
         return "This is  getMember graphQl executed"
     }
+
+    async getAllMemberByAdmin():Promise<string> {
+        return "This is  getAllMemberByAdmin graphQl executed"
+    }
+
+    async updateMemberByAdmin():Promise<string> {
+        return "This is  updateMemberByAdmin graphQl executed"
+    }
 }
+
