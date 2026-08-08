@@ -1,7 +1,7 @@
 import { BadRequestException, CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Message } from 'apps/realstate-api/src/libs/types/message';
 import { AuthService } from '../auth.service';
-import { Message } from 'apps/nestar-api/src/libs/enums/common.enum';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

@@ -3,8 +3,11 @@ import { Resolver, Query, Mutation, Args} from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
+import { MemberType } from '../../libs/enums/member.enum';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { MemberService } from './member.service';
 
 @Resolver()
@@ -57,5 +60,12 @@ export class MemberResolver {
     @Mutation(() => String)
     public async checkAuth(@AuthMember('memberNick') memberNick: string): Promise<string>{
         return `Hi ${memberNick}`
+    }
+
+    @Roles(MemberType.USER, MemberType.AGENT)
+    @UseGuards(RolesGuard)
+    @Mutation(() => String)
+    public async checkAuthRoles(@AuthMember() authMember: Member): Promise<string>{
+        return `Hi ${authMember.memberNick}, you are ${authMember.memberType} (memberId: ${authMember._id})`
     }
 }
