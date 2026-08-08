@@ -1,7 +1,10 @@
-import { InternalServerErrorException} from '@nestjs/common';
+import { InternalServerErrorException, UseGuards} from '@nestjs/common';
 import { Resolver, Query, Mutation, Args} from '@nestjs/graphql';
+import { ObjectId } from 'mongoose';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
+import { AuthMember } from '../auth/decorators/authMember.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { MemberService } from './member.service';
 
 @Resolver()
@@ -21,9 +24,10 @@ export class MemberResolver {
              return this.memberService.login(input)
     }
 
+    @UseGuards(AuthGuard)
     @Mutation(() => String)
-    public async updateMember(): Promise<string>{
-        console.log("Mutation updateMember executed");
+    public async updateMember(@AuthMember('_id') memberId: ObjectId): Promise<string>{
+        console.log("Mutation updateMember executed", memberId);
         return this.memberService.updateMember()
     }
 
@@ -47,4 +51,11 @@ export class MemberResolver {
         return this.memberService.updateMemberByAdmin()
     }
 
+
+    //TEST CHECK AUTH API
+    @UseGuards(AuthGuard)
+    @Mutation(() => String)
+    public async checkAuth(@AuthMember('memberNick') memberNick: string): Promise<string>{
+        return `Hi ${memberNick}`
+    }
 }
