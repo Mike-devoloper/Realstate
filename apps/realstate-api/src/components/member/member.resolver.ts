@@ -1,6 +1,7 @@
 import { InternalServerErrorException, UseGuards} from '@nestjs/common';
 import { Resolver, Query, Mutation, Args} from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
+import { MemberUpdate } from '../../libs/dto/member.update';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberType } from '../../libs/enums/member.enum';
@@ -28,10 +29,13 @@ export class MemberResolver {
     }
 
     @UseGuards(AuthGuard)
-    @Mutation(() => String)
-    public async updateMember(@AuthMember('_id') memberId: ObjectId): Promise<string>{
-        console.log("Mutation updateMember executed", memberId);
-        return this.memberService.updateMember()
+    @Mutation(() => Member)
+    public async updateMember(
+        @Args("input") input: MemberUpdate, 
+        @AuthMember('_id') memberId: ObjectId): Promise<Member>{
+        console.log("Mutation updateMember executed");
+        delete input._id
+        return this.memberService.updateMember(memberId, input)
     }
 
     @Query(() => String)
