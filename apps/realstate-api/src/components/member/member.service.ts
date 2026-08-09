@@ -1,18 +1,22 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { MemberUpdate } from '../../libs/dto/member.update';
+import { MemberUpdate } from '../../libs/dto/member/member.update';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberStatus } from '../../libs/enums/member.enum';
 import { T } from '../../libs/types/common';
 import { Message } from '../../libs/types/message';
 import { AuthService } from '../auth/auth.service';
+import { ViewService } from '../view/view.service';
+import { ViewInput } from '../../libs/dto/view/view.input';
+import { ViewGroup } from '../../libs/enums/view.enum';
 
 @Injectable()
 export class MemberService {
     constructor(@InjectModel("Member") private readonly memberSchema: Model<Member>,
-    private authService: AuthService) {}
+    private authService: AuthService,
+    private viewService: ViewService) {}
 
     async signUp(input: MemberInput):Promise<Member> {
         // HASH PASSWORD
@@ -60,15 +64,25 @@ export class MemberService {
         return result;
     }
 
-    async getMember(targetId: ObjectId):Promise<Member> {
+    async getMember(memberId: ObjectId, targetId: ObjectId):Promise<Member> {
         const search: T = {
             _id: targetId,
             memberStatus: {
                 $in: [MemberStatus.ACTIVE, MemberStatus.BLOCK]
             },
         };
-        const targetMember = await this.memberSchema.findOne(search).exec()
+        const targetMember = await this.memberSchema.findOne(search).lean().exec()
         if(!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND)
+
+        if(memberId) {
+            const viewInput: ViewInput = {memberId: memberId, viewRefId: targetId, viewGroup: ViewGroup.MEMBER}
+            const newView = await this.viewService.recordView(viewInput);
+            if(newView) {
+                await this.memberSchema.findOneAndUpdate(search, {$inc: {memberViews: 1}}, {new: true}).exec()
+                targetMember.memberViews++
+            }
+
+        }
         return targetMember;
     }
 
