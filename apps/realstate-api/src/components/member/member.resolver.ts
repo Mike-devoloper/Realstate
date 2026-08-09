@@ -2,8 +2,8 @@ import { InternalServerErrorException, UseGuards} from '@nestjs/common';
 import { Resolver, Query, Mutation, Args} from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
-import { Member } from '../../libs/dto/member/member';
-import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
+import { Member, Members } from '../../libs/dto/member/member';
+import { AgentsInquiry, LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberType } from '../../libs/enums/member.enum';
 import { shapeIntoMongoObjectId } from '../../libs/types/config';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
@@ -46,6 +46,13 @@ export class MemberResolver {
         console.log("GetMember exucuted");
         const targetId = shapeIntoMongoObjectId(input)
         return this.memberService.getMember(memberId, targetId)
+    }
+
+    @UseGuards(WithoutGuard)
+    @Query(() => Members)
+    public async getAgents(@Args("input") input: AgentsInquiry, @AuthMember('_id') memberId: ObjectId):Promise<Members> {
+        console.log("GetAgents exucuted");
+        return this.memberService.getAgents(memberId, input)
     }
 
     /*  ADMIN  */
