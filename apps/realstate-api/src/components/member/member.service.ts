@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
 import { Member, Members } from '../../libs/dto/member/member';
-import { AgentsInquiry, LoginInput, MemberInput } from '../../libs/dto/member/member.input';
+import { AgentsInquiry, LoginInput, MemberInput, MembersInquiry } from '../../libs/dto/member/member.input';
 import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
 import { T } from '../../libs/types/common';
 import { Direction, Message } from '../../libs/types/message';
@@ -93,7 +93,29 @@ export class MemberService {
 
         if(text) match.memberNick = {$regex: new RegExp(text, "i")};
 
-        console.log(" match:", match);
+        const result = await this.memberSchema.aggregate([
+            {$match: match},
+            {$sort: sort},
+            {
+                $facet: {
+                    list: [{$skip: (input.page -1)* input.limit}, {$limit: input.limit}],
+                    metaCounter: [{$count: "total"}],
+                } } 
+        ]).exec()
+        if(!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND)
+        return result[0]
+    }
+
+    async getAllMemberByAdmin(input: MembersInquiry):Promise<Members> {
+        const {text, memberStatus, memberType} = input.search;
+        const match: T = {};
+        const sort: T = {[input?.sort ?? "createdAt"]: input?.direction ?? Direction.DESC};
+
+        if(memberStatus) match.memberStatus = memberStatus;
+        if(memberType) match.memberType = memberType;
+        if(text) match.memberNick = {$regex: new RegExp(text, "i")};
+        console.log("memberType:", memberType);
+        console.log("match:", match);
 
         const result = await this.memberSchema.aggregate([
             {$match: match},
@@ -108,12 +130,9 @@ export class MemberService {
         return result[0]
     }
 
-    async getAllMemberByAdmin():Promise<string> {
-        return "This is  getAllMemberByAdmin graphQl executed"
-    }
-
-    async updateMemberByAdmin():Promise<string> {
-        return "This is  updateMemberByAdmin graphQl executed"
-    }
+    async updateMemberByAdmin(input: MemberUpdate):Promise<Member> {
+        const result: Member = await this.memberSchema.findOneAndUpdate({_id: input._id}, input, {new: true}).exec();
+        if(!result) throw new InternalServerErrorException(Message.UPDATE_FAILED)
+        return result;
 }
-
+}
