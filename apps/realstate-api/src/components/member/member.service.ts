@@ -5,6 +5,7 @@ import { MemberUpdate } from '../../libs/dto/member.update';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberStatus } from '../../libs/enums/member.enum';
+import { T } from '../../libs/types/common';
 import { Message } from '../../libs/types/message';
 import { AuthService } from '../auth/auth.service';
 
@@ -59,8 +60,16 @@ export class MemberService {
         return result;
     }
 
-    async getMember():Promise<string> {
-        return "This is  getMember graphQl executed"
+    async getMember(targetId: ObjectId):Promise<Member> {
+        const search: T = {
+            _id: targetId,
+            memberStatus: {
+                $in: [MemberStatus.ACTIVE, MemberStatus.BLOCK]
+            },
+        };
+        const targetMember = await this.memberSchema.findOne(search).exec()
+        if(!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND)
+        return targetMember;
     }
 
     async getAllMemberByAdmin():Promise<string> {

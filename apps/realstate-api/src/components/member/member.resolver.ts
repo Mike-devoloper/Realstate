@@ -5,6 +5,7 @@ import { MemberUpdate } from '../../libs/dto/member.update';
 import { Member } from '../../libs/dto/member/member';
 import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
 import { MemberType } from '../../libs/enums/member.enum';
+import { shapeIntoMongoObjectId } from '../../libs/types/config';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -38,10 +39,11 @@ export class MemberResolver {
         return this.memberService.updateMember(memberId, input)
     }
 
-    @Query(() => String)
-    public async getMember():Promise<string>{
+    @Query(() => Member)
+    public async getMember(@Args("memberId") memberId: string):Promise<Member>{
         console.log("GetMember exucuted");
-        return this.memberService.getMember()
+        const targetId = shapeIntoMongoObjectId(memberId)
+        return this.memberService.getMember(targetId)
     }
 
     /*  ADMIN  */
