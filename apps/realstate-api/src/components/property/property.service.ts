@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { Model, ObjectId } from 'mongoose';
 import { Properties, Property } from '../../libs/dto/property/property';
-import { PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
+import { AgentPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { PropertyUpdate } from '../../libs/dto/property/property.update';
 import { PropertyStatus } from '../../libs/enums/property.enum';
 import { ViewGroup } from '../../libs/enums/view.enum';
@@ -154,4 +154,42 @@ export class PropertyService {
             })
         }
     }
+
+
+    public async getAgentProperties(memberId: ObjectId, input: AgentPropertiesInquiry): Promise<Properties> {
+
+        const {propertyStatus} = input.search;
+        if(propertyStatus === PropertyStatus.DELETE) throw new BadRequestException(Message.NOT_ALLOWED_REQUEST);
+
+        const match: T = {
+            memberId: memberId,
+            propertyStatus: propertyStatus ?? {$ne: PropertyStatus.DELETE},
+        };
+        const sort: T = {[input?.sort ?? 'createdAt'] : input?.direction ?? Direction.DESC};
+
+        console.log("match: =>", match);
+
+        const result = await this.propertySchema
+        .aggregate([
+            {$match: match},
+            {$sort: sort},
+            {
+                $facet: {
+                    list: [
+                        {$skip: (input.page -1) * input.limit},
+                        {$limit: input.limit},
+                        //meLiked
+                        lookupMember,
+                        {$unwind: '$memberData'},
+                    ],
+                    metaCounter: [{$count: 'total'}],
+                }
+            }
+        ]).exec();
+
+        if(!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+        
+        return result[0];
+    }
+
 }
