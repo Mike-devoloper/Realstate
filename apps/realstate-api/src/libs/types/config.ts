@@ -5,7 +5,8 @@ import * as path from 'path';
 export const availableAgentSorts = ["createdAt", "updatedAt", "memberLikes", "memberViews", "memberRankings"];
 export const availableMemberSorts = ["createdAt", "updatedAt", "memberLikes", "memberViews"]
 export const availableOptions = ["propertyBarter", "propertyRent"];
-export const availablePropertySorts = ["createdAt", "updatedAt", "propertyLikes", "propertyViews", "propertyRank", "propertyPrice"]
+export const availablePropertySorts = ["createdAt", "updatedAt", "propertyLikes", "propertyViews", "propertyRank", "propertyPrice"];
+export const availableCommentSorts = ["createdAt", "updatedAt",];
 
 export const shapeIntoMongoObjectId = (target: any) => {
     return typeof target === "string" ? new ObjectId(target) : target;
