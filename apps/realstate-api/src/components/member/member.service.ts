@@ -149,7 +149,7 @@ export class MemberService {
 		const { _id, targetKey, modifier } = input;
         console.log("executed ++")
 		return await this.memberSchema
-			.findOneAndUpdate(
+			.findByIdAndUpdate(
 				_id,
 				{
 					$inc: { [targetKey]: modifier },

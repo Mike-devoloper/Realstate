@@ -173,11 +173,11 @@ export class BoardArticleService {
 
 
 
-    private async boardArticleStatsEditor(input: StatisticModifier):Promise<BoardArticle> {
+    public async boardArticleStatsEditor(input: StatisticModifier):Promise<BoardArticle> {
         const {_id, targetKey, modifier} = input;
         console.log("article stats incremented");
         return await this.boardArticleSchema
-        .findOneAndUpdate(
+        .findByIdAndUpdate(
             _id,
             {
                 $inc: { [targetKey]: modifier },

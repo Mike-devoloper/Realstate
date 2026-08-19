@@ -57,9 +57,9 @@ export class PropertyService {
 
     public async propertyStatsEditor(input: StatisticModifier): Promise<Property> {
 		const { _id, targetKey, modifier } = input;
-        console.log("executed ++")
+        console.log("executed ++ propertystats")
 		return await this.propertySchema
-			.findOneAndUpdate(
+			.findByIdAndUpdate(
 				_id,
 				{
 					$inc: { [targetKey]: modifier },
