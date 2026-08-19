@@ -4,9 +4,12 @@ import { ObjectId } from 'mongoose';
 import { Comment, Comments } from '../../libs/dto/comment/comment';
 import { CommentInput, CommentsInquiry } from '../../libs/dto/comment/comment.input';
 import { CommentUpdate } from '../../libs/dto/comment/comment.update';
+import { MemberType } from '../../libs/enums/member.enum';
 import { shapeIntoMongoObjectId } from '../../libs/types/config';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { WithoutGuard } from '../auth/guards/without.guard';
 import { CommentService } from './comment.service';
 
@@ -47,5 +50,16 @@ export class CommentResolver {
         input.search.commentRefId = shapeIntoMongoObjectId(input.search.commentRefId);
         const result = await this.commentService.getComments(memberId, input)
         return
+    }
+
+    //---ADMIN---//
+
+    @Roles(MemberType.ADMIN)
+    @UseGuards(RolesGuard)
+    @Mutation(() => Comment)
+    public async removeCommentByAdmin(@Args('commentId') input: string):Promise<Comment> {
+        console.log("removeCommentByAdmin Mutation");
+        const commentId = shapeIntoMongoObjectId(input);
+        return await this.commentService.removeCommentByAdmin(commentId);
     }
 }
