@@ -8,6 +8,7 @@ import { MemberType } from '../../libs/enums/member.enum';
 import { shapeIntoMongoObjectId } from '../../libs/types/config';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { WithoutGuard } from '../auth/guards/without.guard';
 import { PropertyService } from './property.service';
@@ -69,6 +70,16 @@ export class PropertyResolver {
         console.log("Query AgentgetProperties executed");
         return await this.propertyService.getAgentProperties(memberId, input);
     }
+
+    @UseGuards(AuthGuard)
+	@Mutation(() => Property)
+	public async likeTargetProperty(
+		@Args('propertyId') input: string,
+		@AuthMember('_id') memberId: ObjectId):Promise<Property>{
+		console.log("Mutation LikeTargetProperty");
+		const likeRefId = shapeIntoMongoObjectId(input);
+		return await this.propertyService.likeTargetProperty(memberId, likeRefId);
+	}
 
     //=====ADMIN=====//
 
