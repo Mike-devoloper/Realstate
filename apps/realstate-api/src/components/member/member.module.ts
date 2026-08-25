@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import MemberSchema from '../../schemas/Member.model';
 import { AuthModule } from '../auth/auth.module';
+import { LikeModule } from '../like/like.module';
 import { ViewModule } from '../view/view.module';
 import { MemberResolver } from './member.resolver';
 import { MemberService } from './member.service';
@@ -10,7 +11,8 @@ import { MemberService } from './member.service';
     imports: [
       MongooseModule.forFeature([{name: 'Member', schema: MemberSchema}]),
       AuthModule,
-      ViewModule],
+      ViewModule,
+      LikeModule],
   providers: [MemberResolver, MemberService],
   exports: [MemberService]
 })
