@@ -15,11 +15,13 @@ import { Like } from '../../libs/dto/like/like';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { LikeGroup } from '../../libs/enums/like.enum';
 import { LikeService } from '../like/like.service';
+import { Follower, Following, MeFollowed } from '../../libs/dto/follow/follow';
 
 @Injectable()
 export class MemberService {
 	constructor(
 		@InjectModel('Member') private readonly memberSchema: Model<Member>,
+		@InjectModel("Follow") private readonly followSchema: Model<Follower | Following>,
 		private authService: AuthService,
 		private viewService: ViewService,
 		private likeService: LikeService,
@@ -91,6 +93,7 @@ export class MemberService {
 				targetMember.memberViews++;
 			}
 			//meLiked
+			targetMember.meFollowed = await this.checkSubscription(memberId, targetId);
 			const likeInput = {memberId: memberId, likeRefId: targetId, likeGroup: LikeGroup.MEMBER}
 			targetMember.meLiked = await this.likeService.checkLikeExistence(likeInput);
 
@@ -184,5 +187,10 @@ export class MemberService {
 				{ new: true },
 			)
 			.exec();
+	}
+
+	private async checkSubscription(followerId: ObjectId, followingId: ObjectId):Promise<MeFollowed[]>{
+		const result = await this.followSchema.findOne({followingId: followingId, followerId: followerId}).exec();
+		return result ? [{followerId: followerId, followingId: followingId, myFollowing: true}] : [];
 	}
 }
