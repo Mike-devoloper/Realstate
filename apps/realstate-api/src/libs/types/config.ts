@@ -21,6 +21,24 @@ export const lookupMember = {
 	}
 }
 
+export const lookupFollowingData = {
+	$lookup: {
+		from: "members",
+		localField: "followingId",
+		foreignField: "_id",
+		as: "followingData",
+	}
+}
+
+export const lookupFollowerData = {
+	$lookup: {
+		from: "members",
+		localField: "followerId",
+		foreignField: "_id",
+		as: "followerData",
+	}
+}
+
 export const validMimeTypes = ['image/png', 'image/jpg', 'image/jpeg'];
 export const getSerialForImage = (filename: string) => {
 	const ext = path.parse(filename).ext;
