@@ -10,7 +10,7 @@ import { BoardArticleStatus } from '../../libs/enums/board-article.enum';
 import { LikeGroup } from '../../libs/enums/like.enum';
 import { ViewGroup } from '../../libs/enums/view.enum';
 import { StatisticModifier, T } from '../../libs/types/common';
-import { lookupMember, shapeIntoMongoObjectId } from '../../libs/types/config';
+import { lookupAuthMemberLiked, lookupMember, shapeIntoMongoObjectId } from '../../libs/types/config';
 import { Direction, Message } from '../../libs/types/message';
 import { LikeService } from '../like/like.service';
 import { MemberService } from '../member/member.service';
@@ -102,7 +102,7 @@ export class BoardArticleService {
                     list: [
                         {$skip: (input.page -1) * input.limit},
                         {$limit: input.limit},
-                        //meLked
+                        lookupAuthMemberLiked(memberId),
                         lookupMember,
                         {$unwind: '$memberData'},
                     ],
