@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { Like, MeLiked } from '../../libs/dto/like/like';
 import { LikeInput } from '../../libs/dto/like/like.input';
+import { Properties } from '../../libs/dto/property/property';
+import { OrdinaryInquiry } from '../../libs/dto/property/property.input';
+import { LikeGroup } from '../../libs/enums/like.enum';
 import { T } from '../../libs/types/common';
+import { lookupFavorite } from '../../libs/types/config';
 import { Message } from '../../libs/types/message';
 
 @Injectable()
@@ -32,5 +36,39 @@ export class LikeService {
         const {memberId, likeRefId} = input;
         const result = await this.likeSchema.findOne({memberId: memberId, likeRefId: likeRefId});
         return result ? [{memberId: memberId, likeRefId: likeRefId, myFavorite: true}] : [];
+    }
+
+    public async getFavoriteProperties(memberId: ObjectId, inquiry: OrdinaryInquiry):Promise<Properties> {
+        const {page, limit} = inquiry;
+
+        const match:T = {likeGroup: LikeGroup.PROPERTY, memberId: memberId};
+        const data: T = await this.likeSchema.aggregate([
+            {$match: match},
+            {$sort: {updatedAt: -1}},
+            {
+                $lookup: {
+                    from: "properties",
+                    localField: "likeRefId",
+                    foreignField: "_id",
+                    as: "favoriteProperty",
+                }
+            },
+            {$unwind: "$favoriteProperty"},
+            {
+                $facet: {
+                    list: [
+                        {$skip: (page-1)* limit},
+                        {$limit: limit},
+                        lookupFavorite
+                    ],
+                    metaCounter: [{$count: 'total'}],
+                }
+            }
+        ]).exec();
+        console.log("Favorite => :", data);
+        const  result: Properties = {list: [], metaCounter: data[0].metaCounter};
+        console.log("result => :", result);
+        result.list = data[0].list.map((ele) => ele.favoriteProperty);
+        return result;
     }
 }

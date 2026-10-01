@@ -109,6 +109,15 @@ export const lookupFollowerData = {
 	}
 }
 
+export const lookupFavorite = {
+	$lookup: {
+		from: "members",
+		localField: "favoriteProperty.memberId",
+		foreignField: "_id",
+		as: "favoriteProperty.memberData"
+	}
+}
+
 export const validMimeTypes = ['image/png', 'image/jpg', 'image/jpeg'];
 export const getSerialForImage = (filename: string) => {
 	const ext = path.parse(filename).ext;

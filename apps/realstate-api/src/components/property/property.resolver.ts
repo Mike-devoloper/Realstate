@@ -2,7 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver, Query} from '@nestjs/graphql';
 import { ObjectId } from 'mongoose';
 import { Properties, Property } from '../../libs/dto/property/property';
-import { AgentPropertiesInquiry, AllPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
+import { AgentPropertiesInquiry, AllPropertiesInquiry, OrdinaryInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { PropertyUpdate } from '../../libs/dto/property/property.update';
 import { MemberType } from '../../libs/enums/member.enum';
 import { shapeIntoMongoObjectId } from '../../libs/types/config';
@@ -59,6 +59,17 @@ export class PropertyResolver {
         console.log("Query getProperties executed");
         return await this.propertyService.getProperties(memberId, input);
     }
+
+    @UseGuards(AuthGuard)
+    @Query(() => Properties)
+    public async getFavorites(
+        @Args("input") input: OrdinaryInquiry,
+        @AuthMember('_id') memberId: ObjectId
+    ): Promise<Properties> {
+        console.log("Query getFavorites executed");
+        return await this.propertyService.getFavorites(memberId, input);
+    }
+
 
     @Roles(MemberType.AGENT)
     @UseGuards(RolesGuard)
